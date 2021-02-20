@@ -22,6 +22,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.android.guesstheword.R
 import com.example.android.guesstheword.databinding.ScoreFragmentBinding
@@ -30,6 +33,9 @@ import com.example.android.guesstheword.databinding.ScoreFragmentBinding
  * Fragment where the final score is shown, after the game is over
  */
 class ScoreFragment : Fragment() {
+
+    private lateinit var viewModel: ScoreViewModel
+    private lateinit var viewModelFactory: ScoreViewModelFactory
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -44,6 +50,35 @@ class ScoreFragment : Fragment() {
                 container,
                 false
         )
+        
+        viewModelFactory = ScoreViewModelFactory(ScoreFragmentArgs.fromBundle(requireArguments()).score)
+        
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ScoreViewModel::class.java)
+
+        //========================================================================================================================
+        //To print the score when the value of the score changed
+        /*viewModel.score.observe(viewLifecycleOwner, Observer{
+            newScore-> binding.scoreText.text = newScore.toString()
+        })*/
+        //========================================================================================================================
+
+        //binding.scoreText.text = viewModel.score.toString() //removed as observer will update the value
+        binding.scoreViewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner //For binding to observe livedata changes
+
+        //Add a listener to the button - Removed as view is bind to viewmodel
+        //binding.playAgainButton.setOnClickListener { viewModel.onPlayAgain()}
+
+        //Add observer to the eventPlayAgain LiveData Value - removed after binding view/xml to viewmodel============================
+        //ScoreFragmentDirections is most likely an in-build set of functions for fragment
+        viewModel.eventPlayAgain.observe(viewLifecycleOwner, Observer{
+            playAgain ->
+            if (playAgain){
+               findNavController().navigate(ScoreFragmentDirections.actionRestart())
+                viewModel.onPlayAgainComplete()
+            }
+        })
+        //============================================================================================================================
 
         return binding.root
     }
