@@ -34,7 +34,7 @@ class TitleFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem):Boolean{
-        //Select
+        //Navigation when selected from the menu bar
         return NavigationUI.onNavDestinationSelected(
                 item, requireView().findNavController()) || super.onOptionsItemSelected(item)
     }
